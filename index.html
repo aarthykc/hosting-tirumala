@@ -1,9 +1,22 @@
-</<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
-	<title></title>
+<meta charset=utf-8 />
+<title>A simple map</title>
+<meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+<script src='https://api.mapbox.com/mapbox.js/v2.2.1/mapbox.js'></script>
+<link href='https://api.mapbox.com/mapbox.js/v2.2.1/mapbox.css' rel='stylesheet' />
+<style>
+  body { margin:0; padding:0; }
+  #map { position:absolute; top:0; bottom:0; width:100%; }
+</style>
 </head>
 <body>
-Hello World.
+<div id='map'></div>
+<script>
+L.mapbox.accessToken = 'pk.eyJ1IjoiYWFydGh5a2MiLCJhIjoiNTA2NWNkNTg5NTE0MGY5MmIxODkwZmY0MDhkYzFmMWYifQ.F8vMO8hrFUXZyntsz3zLQw';
+var map = L.mapbox.map('map', 'aarthykc.930acd47')
+    .setView([13.668297361203177, 79.33802604675293], 14);
+</script>
 </body>
 </html>
