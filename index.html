@@ -8,6 +8,7 @@
   <script src='https://api.mapbox.com/mapbox.js/plugins/leaflet-hash/v0.2.1/leaflet-hash.js'></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
   <script src='https://api.mapbox.com/mapbox.js/plugins/mapbox-directions.js/v0.3.0/mapbox.directions.js'></script>
+  
   <script src="js/geocoding.js"></script>
   <script src="js/load_from_geojson.js"></script>
   <link href='https://api.mapbox.com/mapbox.js/v2.2.1/mapbox.css' rel='stylesheet' />
@@ -101,37 +102,99 @@
 </div>
 
  <script>
+
   L.mapbox.accessToken = 'pk.eyJ1IjoiYWFydGh5a2MiLCJhIjoiNTA2NWNkNTg5NTE0MGY5MmIxODkwZmY0MDhkYzFmMWYifQ.F8vMO8hrFUXZyntsz3zLQw';
   var geocoder = L.mapbox.geocoderControl('mapbox.places')
-  var map = L.mapbox.map('map', 'aarthykc.930acd47').addControl(geocoder);
+  var map = L.mapbox.map('map', 'aarthykc.2ab7282b').addControl(geocoder);
   var hash = L.hash(map);
   var marker = new L.Marker;
   var fixedMarker = new L.LatLng(13.6795235,79.3497522);
+  var fc = fixedMarker;
   map.setView([13.6795235,79.3497522], 15);
 
-
-  //fixing a point and sending it to instructions div
-  var fc = fixedMarker;
   map.on('click', function(e) 
   {
     c=e.latlng;
     document.getElementById('instructions').innerHTML=(fc.distanceTo(c)).toFixed(0) + 'm';
   });
 
-  //adding layers to toggle
-  function change_layers() 
-  {  
-    var layers = 
-    {
-   Streets: L.mapbox.tileLayer('aarthykc.2ab7282b'),
-   Outdoors: L.mapbox.tileLayer('examples.ik7djhcc'),
-   Satellite: L.mapbox.tileLayer('examples.map-igb471ik')
-    };
-    layers.Streets.addTo(map);
-    L.control.layers(layers).addTo(map);
-    
+function coordinates()
+{
+  var bbox = map.getBounds();
+  var bottom = bbox._southWest.lat;
+  var left = bbox._southWest.lng;
+  var top = bbox._northEast.lat;
+  var right = bbox._northEast.lng;
+  return String(bbox._southWest.lat) +","+ String(bbox._southWest.lng)+","+String(bbox._northEast.lat) +","+ String(bbox._northEast.lng);
+
+}
+
+
+
+  var hospitalLayer = L.layerGroup();
+  var bankLayer = L.layerGroup();
+  var restaurantLayer = L.layerGroup();
+  
+  // create featureGroup for each amenity
+  //fixing a point and sending it to instructions div
+
+  var baselayers = {
+    Streets: L.mapbox.tileLayer('aarthykc.2ab7282b'),
+    Outdoors: L.mapbox.tileLayer('examples.ik7djhcc'),
+    Satellite: L.mapbox.tileLayer('examples.map-igb471ik')
   }
-  change_layers();
+
+  var overlays = {
+    'Hospital': hospitalLayer,
+    'Bank': bankLayer,
+    'Restaurant': restaurantLayer
+  }
+
+  L.control.layers(baselayers, overlays).addTo(map);
+
+   
+
+  map.on('overlayadd', function(layer) {
+    console.log(layer);
+    layer.layer.clearLayers();
+    var amenity = layer.name;
+    if (amenity) {
+      coordinates();
+      var url = "http://overpass.osm.rambler.ru/cgi/interpreter?data=[out:json];node[amenity="+amenity.toLowerCase()+"]("+coordinates()+");out;"
+      $.ajax(url)
+        .done(function(data) {
+          console.log(data);
+          for (var i=0; i<=data.elements.length; i++) {
+            var point = data.elements[i];
+            if (point && point.lat && point.lon) {
+              var marker = new L.Marker([point.lat, point.lon]);
+              layer.layer.addLayer(marker);
+            }
+            }
+        });
+
+    }
+  });
+  //adding layers to toggle
+
+  // function change_layers() 
+  // {  
+  //   var layers = 
+  //   {
+  //  Streets: L.mapbox.tileLayer('aarthykc.2ab7282b'),
+  //  Outdoors: L.mapbox.tileLayer('examples.ik7djhcc'),
+  //  Satellite: L.mapbox.tileLayer('examples.map-igb471ik')
+  //   };
+  //   var amenities = {
+  //     Hospital: changeToHospital();;
+  //     ATM: changeToATM(),
+  //     Bank: changeToBank(),
+  //   }
+  //   layers.Streets.addTo(map);
+  //   L.control.layers(layers, amenities).addTo(map);
+    
+  // }
+  // change_layers();
   set_marker_from_json();
   geocode_search();
 
