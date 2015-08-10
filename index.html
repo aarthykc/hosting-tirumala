@@ -8,11 +8,13 @@
   <script src='https://api.mapbox.com/mapbox.js/plugins/leaflet-hash/v0.2.1/leaflet-hash.js'></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
   <script src='https://api.mapbox.com/mapbox.js/plugins/mapbox-directions.js/v0.3.0/mapbox.directions.js'></script>
-  
+  <script src='https://api.mapbox.com/mapbox.js/plugins/leaflet-label/v0.2.1/leaflet.label.js'></script>
   <script src="js/geocoding.js"></script>
   <script src="js/load_from_geojson.js"></script>
   <link href='https://api.mapbox.com/mapbox.js/v2.2.1/mapbox.css' rel='stylesheet' />
   <link rel='stylesheet' href='https://api.mapbox.com/mapbox.js/plugins/mapbox-directions.js/v0.3.0/mapbox.directions.css' type='text/css' />
+  <link href='https://api.mapbox.com/mapbox.js/plugins/leaflet-label/v0.2.1/leaflet.label.css' rel='stylesheet' />
+  
   
   <style>
 
@@ -71,6 +73,12 @@
         font-size:9px;
         color:#808080;
       }
+      #poi{
+        [category='Restaurant'] 
+        {
+      marker-file: url(img/restaurant-12.svg);
+      marker-fill: #b36;
+      }
 
 
     </style>
@@ -102,6 +110,34 @@
 </div>
 
  <script>
+  var hospitalIcon = L.icon({
+  iconUrl: 'img/hospital-12.svg',
+  iconSize: [35, 35],
+  iconAnchor: [5, 20],
+  popupAnchor: [200, 200],
+  opacity : 0.1
+});
+
+var bankIcon = L.icon({
+  iconUrl: 'img/bank-12.svg',
+  iconSize: [32, 32],
+  iconAnchor: [5, 20],
+  popupAnchor: [20, 20],
+  opacity : 0.5
+});
+
+
+  var restaurantIcon = L.icon({
+  iconUrl: 'img/restaurant-12.svg',
+  iconSize: [32, 32],
+  iconAnchor: [5, 20],
+  popupAnchor: [20, 20],
+  opacity : 0.5
+
+  
+});
+
+
 
   L.mapbox.accessToken = 'pk.eyJ1IjoiYWFydGh5a2MiLCJhIjoiNTA2NWNkNTg5NTE0MGY5MmIxODkwZmY0MDhkYzFmMWYifQ.F8vMO8hrFUXZyntsz3zLQw';
   var geocoder = L.mapbox.geocoderControl('mapbox.places')
@@ -162,19 +198,38 @@ function coordinates()
       coordinates();
       var url = "http://overpass.osm.rambler.ru/cgi/interpreter?data=[out:json];node[amenity="+amenity.toLowerCase()+"]("+coordinates()+");out;"
       $.ajax(url)
-        .done(function(data) {
-          console.log(data);
-          for (var i=0; i<=data.elements.length; i++) {
-            var point = data.elements[i];
-            if (point && point.lat && point.lon) {
-              var marker = new L.Marker([point.lat, point.lon]);
-              layer.layer.addLayer(marker);
-            }
-            }
-        });
+      .done(function(data) {
+        console.log(data);
+        for (var i=0; i<=data.elements.length; i++) {
+          var point = data.elements[i];
+          if (point && point.lat && point.lon) 
+          {
+            
+            if(amenity == 'Hospital')
+            { var marker = new L.Marker([point.lat, point.lon], {icon: hospitalIcon}).bindLabel(point.tags.name).addTo(map);
+
+           } 
+
+            if(amenity == 'Bank')
+            { var marker = new L.Marker([point.lat, point.lon], {icon: bankIcon}).bindLabel(point.tags.name).addTo(map);
+            
+             } 
+           if(amenity == 'Restaurant')
+            { var marker = new L.Marker([point.lat, point.lon], {icon: restaurantIcon}).bindLabel(point.tags.name).addTo(map);
+
+           } 
+          
+          layer.layer.addLayer(marker);
+        }
+      }
+
+    });
 
     }
   });
+
+
+
   //adding layers to toggle
 
   // function change_layers() 

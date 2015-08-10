@@ -21,12 +21,6 @@ function set_marker_from_json()
       "population": "1000",
       "postal_code": "517504",
 
-      title:  "Tirumala",
-      "marker-color": "#f86767",
-      "marker-size": "large",
-      "marker-symbol": "star",
-      url:   'https://en.wikipedia.org/wiki/Tirumala'
-
     },
     "geometry": {
       "type": "Point",
